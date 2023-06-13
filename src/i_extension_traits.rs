@@ -1,6 +1,6 @@
 // Imagine you have an outcome enum like this.
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum Outcome {
 	Ok,
 	SomethingWentWrong,
@@ -19,14 +19,18 @@ pub fn process_stuff<T>(input: impl Iterator<Item = T>) -> Vec<Outcome> {
 //
 // A boring solution follows 🫣:
 
+fn count(outcomes: &[Outcome], what: Outcome) -> usize {
+    outcomes.into_iter().filter(|x| *x == &what).count()
+}
+
 pub fn ok_count(outcomes: Vec<Outcome>) -> usize {
-	todo!();
+    count(&outcomes, Outcome::Ok)
 }
 pub fn something_went_wrong_count(outcomes: Vec<Outcome>) -> usize {
-	todo!();
+    count(&outcomes, Outcome::SomethingWentWrong)
 }
 pub fn i_dont_know_count(outcomes: Vec<Outcome>) -> usize {
-	todo!();
+    count(&outcomes, Outcome::IDontKnow)
 }
 
 // This is quite lame. We want to be able to call these methods directly on the `Vec<Outcome>`. But
@@ -47,13 +51,13 @@ pub trait OutcomeCount {
 
 impl OutcomeCount for Vec<Outcome> {
 	fn ok_count(&self) -> usize {
-		todo!();
+        count(self, Outcome::Ok)
 	}
 	fn i_dont_know_count(&self) -> usize {
-		todo!();
+        count(self, Outcome::IDontKnow)
 	}
 	fn something_went_wrong_count(&self) -> usize {
-		todo!();
+        count(self, Outcome::SomethingWentWrong)
 	}
 }
 
@@ -76,13 +80,13 @@ impl OutcomeCount for Vec<Outcome> {
 /// On a scale from 0 - 255, with zero being extremely easy and 255 being extremely hard,
 /// how hard did you find this section of the exam.
 pub fn how_hard_was_this_section() -> u8 {
-	todo!()
+	50
 }
 
 /// This function is not graded. It is just for collecting feedback.
 /// How much time (in hours) did you spend on this section of the exam?
 pub fn how_many_hours_did_you_spend_on_this_section() -> u8 {
-	todo!()
+	1
 }
 
 #[cfg(test)]

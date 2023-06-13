@@ -12,9 +12,13 @@
 // let map1: HashMap<u32, u32> = map![1 => 2, 3 => 4, 5 => 6];
 #[macro_export]
 macro_rules! map {
-	( $($todo:tt)* ) => {
-		Default::default()
-	};
+	( $($key:expr => $val:expr),* ) => {{
+		let mut d = HashMap::default();
+        $(
+            d.insert($key, $val);
+        )*
+        d
+	}};
 }
 
 /// Next, write a macro that implements a `get` function on a type.
@@ -23,9 +27,9 @@ macro_rules! map {
 /// (ie) a struct that implements `Get`. An example of manually building one of such structs is what
 /// you see in `struct Seven`. It works, but it is verbose. We want a macro that would automatically
 /// generate this implementation for us, as such:
-///
-/// ```
-/// use pba_qualifier_exam:impl_get;
+/// TODO missing :?
+/// ``` 
+/// use pba_qualifier_exam::impl_get;
 /// impl_get! {
 /// 	// implements `Get<u32>` for `struct Six`
 /// 	Six: u32 = 6;
@@ -56,7 +60,16 @@ impl Get<u32> for Seven {
 
 #[macro_export]
 macro_rules! impl_get {
-	( $($todo:tt)* ) => {};
+	( $( $pub:vis $name:ident : $typ:ty = $val:expr; )* ) => {
+        $( 
+            $pub struct $name;
+            impl $crate::k_macros::Get<$typ> for $name {
+                fn get() -> $typ {
+                    $val
+                }
+            }
+        )*
+    };
 }
 
 /// This function is not graded. It is just for collecting feedback.
@@ -75,6 +88,8 @@ pub fn how_many_hours_did_you_spend_on_this_section() -> u8 {
 #[cfg(test)]
 mod tests {
 	use std::collections::HashMap;
+    // TODO The import missing?
+    use super::Get;
 
 	#[test]
 	fn map() {
@@ -99,9 +114,9 @@ mod tests {
 		);
 
 		// you should be able to make these work.
-		// assert_eq!(Foo::get(), 10);
-		// assert_eq!(Bar::get(), 42);
-		// assert_eq!(Baz::get(), 21);
+		assert_eq!(Foo::get(), 10);
+		assert_eq!(Bar::get(), 42);
+		assert_eq!(Baz::get(), 21);
 
 		// As an extra, ungraded, challenge, try to make this work.
 		// This is not part of the main problem because it requires the nightly compiler.

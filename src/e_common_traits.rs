@@ -22,7 +22,7 @@ pub struct Employee {
 
 impl PartialEq for Employee {
 	fn eq(&self, other: &Self) -> bool {
-		todo!("complete the implementation");
+        self.uid == other.uid
 	}
 }
 impl Eq for Employee {}
@@ -34,14 +34,18 @@ impl Eq for Employee {}
 
 impl PartialOrd for Employee {
 	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-		todo!("complete the implementation");
+        Some(self.cmp(other))
 	}
 }
 
 impl Ord for Employee {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-		todo!("complete the implementation");
-	}
+        self.uid.cmp(&other.uid)
+            .then_with(|| {
+                let value = |e: &Employee| e.experience * 30_000 / e.wage;
+                value(self).cmp(&value(other))
+            })
+    }
 }
 
 // We want to parse employee information from a string data
@@ -59,14 +63,35 @@ impl TryFrom<String> for Employee {
 	type Error = &'static str;
 
 	fn try_from(value: String) -> Result<Self, Self::Error> {
-		todo!("complete the implementation");
+        let mut split = value.split(",");
+        let name = split.next().ok_or("missing name")?;
+        let experience = split.next().ok_or("missing experience")?;
+        let wage = split.next().ok_or("missing wage")?;
+        let uid = split.next().ok_or("missing uid")?;
+    
+        let parse_u32 = |v: &str| -> Result<u32, _> {
+            v.trim().parse().map_err(|_| "invalid number")
+        };
+
+        Ok(Self {
+            name: name.into(),
+            experience: parse_u32(experience)?,
+            wage: parse_u32(wage)?,
+            uid: parse_u32(uid)?,
+        })
 	}
 }
 
 // We also want to convert employees back into strings in the same format as above.
 impl From<Employee> for String {
 	fn from(e: Employee) -> Self {
-		todo!("complete the implementation");
+        format!(
+            "{name}, {experience}, {wage}, {uid}",
+            name = e.name,
+            experience = e.experience,
+            wage = e.wage,
+            uid = e.uid,
+        )
 	}
 }
 
@@ -74,13 +99,13 @@ impl From<Employee> for String {
 /// On a scale from 0 - 255, with zero being extremely easy and 255 being extremely hard,
 /// how hard did you find this section of the exam.
 pub fn how_hard_was_this_section() -> u8 {
-	todo!()
+	100
 }
 
 /// This function is not graded. It is just for collecting feedback.
 /// How much time (in hours) did you spend on this section of the exam?
 pub fn how_many_hours_did_you_spend_on_this_section() -> u8 {
-	todo!()
+	1
 }
 
 #[cfg(test)]
