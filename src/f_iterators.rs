@@ -40,11 +40,15 @@ pub fn first_n_even(mut vals: impl Iterator<Item = u32>) -> Option<impl Iterator
 
 /// Return an "infinite" iterator that yields the squares of the whole numbers.
 /// For example, the first few values should be 0, 1, 4, 9, 16, 25, ...
+/// When the resulting values exceed `u32` type start over.
 ///
 /// The iterator should be bounded only by the u32 type, not by your code
 pub fn square_whole_numbers() -> impl Iterator<Item = u32> {
     // TODO The range should actually be only sqrt of max value
-    (0..u32::MAX).into_iter().map(|x| x * x)
+    std::iter::iter(|| {
+
+    })
+    (0u32..).into_iter().map(|x| x * x)
 }
 
 /// An iterator that generates the Fibonacci sequence.

@@ -88,8 +88,6 @@ pub fn how_many_hours_did_you_spend_on_this_section() -> u8 {
 #[cfg(test)]
 mod tests {
 	use std::collections::HashMap;
-    // TODO The import missing?
-    use super::Get;
 
 	#[test]
 	fn map() {
@@ -104,6 +102,8 @@ mod tests {
 
 	#[test]
 	fn impl_get() {
+        use super::Get;
+
 		impl_get!(
 			// should generate `struct Foo` that implements `Get<u32>`
 			Foo: u32 = 10;

@@ -7,6 +7,8 @@ use std::{marker::PhantomData, cell::Cell};
 // You may uncomment and use the following import if you need it. You may also read its
 // documentation at https://doc.rust-lang.org/std/cell/struct.RefCell.html
 // use std::cell::RefCell;
+//
+// TODO [ToDr] might be better to suggest using `Cell` instead.
 
 #[derive(Eq, PartialEq, Debug, Clone, Copy)]
 pub struct Joule(pub u32);
@@ -240,6 +242,8 @@ impl<const C: u8, F1: Fuel, F2: Fuel> Fuel for CustomMixed<C, F1, F2> {
 	}
 }
 
+// TODO [ToDr] this is misleading, it's not really a task, nor it's true. It just applies for
+// OmniGenerator
 // Now, any of our existing energy providers can be used with a mix fuel.
 
 /// A function that returns the energy produced by the `OmniGenerator` with efficiency of 80%, when
@@ -262,10 +266,11 @@ impl IsRenewable for LithiumBattery {}
 /// Define the following struct such that it only provides energy if the fuel is `IsRenewable`.
 ///
 /// It has perfect efficiency.
-pub struct GreenEngine<F: Fuel>(pub PhantomData<F>);
+/// TODO [ToDr] I'd suggest making the GreenEngine a wrapper type for some other engine.
+pub struct GreenEngine<F: Fule + IsRenewable, P: ProvideEnergy<F>>(pub P);
 impl<F: Fuel + IsRenewable> ProvideEnergy<F> for GreenEngine<F> {
 	fn provide_energy(&self, f: FuelContainer<F>) -> <F as Fuel>::Output {
-        apply_efficiency(f, 100)
+        self.0.provide_energy(f)
 	}
 }
 
@@ -273,12 +278,24 @@ impl<F: Fuel + IsRenewable> ProvideEnergy<F> for GreenEngine<F> {
 /// `BTU`.
 ///
 /// It has perfect efficiency.
-pub struct BritishEngine<F: Fuel>(pub PhantomData<F>);
+
+/// TODO [ToDr] Consider restricting only the trait implementation, not the entire struct. Seems
+/// like more idiomatic Rust.
+pub struct BritishEngine<F>(pub PhantomData<F>);
+
 impl<F: Fuel<Output = BTU>> ProvideEnergy<F> for BritishEngine<F> {
 	fn provide_energy(&self, f: FuelContainer<F>) -> <F as Fuel>::Output {
         apply_efficiency(f, 100)
 	}
 }
+
+/*
+ * Alternative try_build test implementation
+assert_provides_energy_for_btu::<BritishEngine<TestBTUFuel>>();
+
+fn assert_provides_energy_for_btu<P: ProvideEnergy<F>, F: Fuel<Output = BTU>>() {
+}
+*/
 
 // Congratulations! you have finished the advance trait section.
 //
@@ -385,4 +402,7 @@ mod tests {
 			Mixed::<Diesel, LithiumBattery>::energy_density()
 		);
 	}
+
+    #[test]
+    fn 
 }

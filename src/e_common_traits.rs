@@ -40,11 +40,33 @@ impl PartialOrd for Employee {
 
 impl Ord for Employee {
 	fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.uid.cmp(&other.uid)
-            .then_with(|| {
-                let value = |e: &Employee| e.experience * 30_000 / e.wage;
-                value(self).cmp(&value(other))
-            })
+        // self.uid.cmp(&other.uid)
+        //     .then_with(|| {
+        //         let value = |e: &Employee| e.experience * 30 * 24 / e.wage;
+        //         value(self).cmp(&value(other))
+        //     })
+
+// -------
+    // TODO [ToDr] This is the only correct solution, we can't assume something is equal
+    // for the purpose of sorting (PartialOrd) and different in case of comparison (PartialEq)
+    // because that breaks a bunch of assumptions.
+    //
+    // For instance you wouldn't be able to binary_search in such collection.
+    // From docs: https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
+    // The methods of this trait must be consistent with each other and with those of PartialEq.
+    
+        if self.uid == other.uid {
+            std::cmp::Ordering::Equal   
+        } else {
+            let value = |e: &Employee| e.experience * 30 * 24 / e.wage;
+            let q = value(self).cmp(&value(other));
+
+            if q == std::cmp::Ordering::Equal {
+                self.uid.cmp(&other.uid)
+            } else {
+                q
+            }
+        }
     }
 }
 
@@ -68,10 +90,16 @@ impl TryFrom<String> for Employee {
         let experience = split.next().ok_or("missing experience")?;
         let wage = split.next().ok_or("missing wage")?;
         let uid = split.next().ok_or("missing uid")?;
+
+        // TODO [ToDr] this should additionally check that the iterator is empty.
+        if split.next().is_some() {
+            return Err("too many commas");
+        }
     
         let parse_u32 = |v: &str| -> Result<u32, _> {
             v.trim().parse().map_err(|_| "invalid number")
         };
+
 
         Ok(Self {
             name: name.into(),
